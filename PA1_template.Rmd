@@ -1,25 +1,90 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: 'Reproducible Research: Peer Assessment 1'
+author: "Anirudh Srinivasan (s.anirudh27)"
+date: "2 June 2016"
+output: html_document
 ---
-
 
 ## Loading and preprocessing the data
 
+The file has been downloaded to a location in the local drive. Below is the code used for reading the csv file into R
 
+```{r, results='hide'}
+fileURL <- "/Users/AnirudhS/Dropbox/Coursera/Reproducible Research/Week 2 Project/"
+setwd(fileURL)
+dat <- read.csv("activity.csv", header = T)
+
+#Code for converting the date column into date format
+dat$date <- as.Date(dat$date)
+
+```
+
+No kind of transformation had been made until now on the format of the data which was given. The data is not shown in this section as it would just take up unnecessary space in displaying it.
 
 ## What is mean total number of steps taken per day?
 
+The missing vales are told to be ignored for this question.
 
+1. Code for histogram of total number of steps made each day is as follows:
+
+```{r}
+total_steps <- aggregate(steps~date,dat,sum)
+plot(total_steps$date, total_steps$steps, type = 'h', xlab = "Date", ylab = "Total Number of Steps", main = "Histogram for Total Steps each day", lwd = 3, col = "red")
+```
+
+2. Calculate and report the mean and median total number of steps taken per day
+
+```{r}
+mean_steps <- aggregate(steps~date, dat, mean)
+median_steps <- aggregate(steps~date, dat, median)
+Mean_Median_Steps <- merge(mean_steps, median_steps, by = "date")
+colnames(Mean_Median_Steps) <- c("Date", "Mean", "Median")
+print(Mean_Median_Steps)
+```
 
 ## What is the average daily activity pattern?
 
+1. Code for time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis):
+
+```{r}
+avg_interval_steps <- aggregate(steps~interval, dat, mean)
+plot(avg_interval_steps$interval, avg_interval_steps$steps, type = 'l', xlab = "Time Interval", ylab = "Average Steps", main = "Average Number of Steps per interval across all Days", lwd = 2, col = "blue")
+```
+
+2. Which 5-min interval on average across all the days in the dataset, contains the maximum number of steps?
+
+```{r}
+#Code for finding the interval which has the maximum average number of steps
+max_value <- max(avg_interval_steps$steps)
+max_interval <- subset(avg_interval_steps, steps == max_value)
+print(max_interval)
+```
+
+Thus the maximum interval is as above.
+
+## Inputting missing values
+
+1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+
+```{r}
+#Calculating the number of NA's in the data fram
+num_NA <- sum(is.na(dat$steps))
+print(num_NA)
+```
+
+2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+```{r}
+#Code for filling up the NA places with the average of the 5 min interval
+#Step 1. Creating a function to replace the value of NA with the average in avg_interval_steps
+replace_na <- function(steps, interval)
+{
+  if(is.na(steps))
+  {
+
+  }
+}
+```
 
 
-## Imputing missing values
 
-
-
-## Are there differences in activity patterns between weekdays and weekends?
