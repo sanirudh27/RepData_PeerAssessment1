@@ -15,8 +15,8 @@ setwd(fileURL)
 dat <- read.csv("activity.csv", header = T)
 
 #Code for converting the date column into date format
-dat$date <- as.Date(dat$date)
-
+library(lubridate)
+dat$date <- parse_date_time(dat$date, c('dmy'))
 ```
 
 No kind of transformation had been made until now on the format of the data which was given. The data is not shown in this section as it would just take up unnecessary space in displaying it.
@@ -77,14 +77,55 @@ print(num_NA)
 ```{r}
 #Code for filling up the NA places with the average of the 5 min interval
 #Step 1. Creating a function to replace the value of NA with the average in avg_interval_steps
-replace_na <- function(steps, interval)
+dat2 <- dat
+for(i in 1:nrow(dat2))
 {
-  if(is.na(steps))
-  {
-
-  }
+    if(is.na(dat2[i, "steps"]))
+    {
+      temp <- dat2[i, "interval"]
+      mean_interval <- avg_interval_steps[avg_interval_steps$interval == temp, "steps"]
+      dat2[i, "steps"] <- mean_interval
+    }
+    
 }
 ```
 
+3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
+```{r}
+#dat2 in the previous code is the dataset which is the same as dat but has the missing value filled in
+```
 
+4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+```{r}
+total_steps_No_NA <- aggregate(steps~date,dat2,sum)
+plot(total_steps_No_NA$date, total_steps_No_NA$steps, type = 'h', xlab = "Date", ylab = "Total Number of Steps", main = "Histogram for Total Steps each day", lwd = 3, col = "red")
+```
+
+## Are there differences in activity patterns between weekdays and weekends?
+
+1. Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+```{r}
+for (i in 1:nrow(dat2))
+{
+  if(weekdays(dat2[i, "date"]) %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"))
+  {
+    dat2[i, "day_type"] = "Weekday"
+  }
+  else
+  {
+    dat2[i, "day_type"] = "Weekend"
+  }  
+}
+```
+
+2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+
+```{r}
+library(ggplot2)
+avg_day_type <- aggregate(steps ~ interval + day_type, data=dat2, mean)
+ggplot(avg_day_type, aes(interval, steps)) + geom_line() + facet_grid(day_type ~ .) +
+    xlab("5-minute interval") + ylab("Number of steps")
+```
